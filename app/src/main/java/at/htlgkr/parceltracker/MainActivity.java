@@ -141,7 +141,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void longClickedOnParcel(AdapterView<?> adapterView, View view, int i, long l){
         Parcel parcel = (Parcel) adapterView.getItemAtPosition(i);
+        Parcel originalP = parcel;
         parcel.setCategory(parcelManager.getNextCategory(parcel.getCategory()));
+
+//        int index = parcelManager.getTicketList().indexOf(originalP);
+        parcelManager.getTicketList().remove(originalP);
+        parcelManager.addTicket(parcel);
+        updateListView();
+
+
+        reloadCats();
 
     }
 
@@ -208,6 +217,8 @@ public class MainActivity extends AppCompatActivity {
         EditText txtEnd = dialog.findViewById(R.id.et_end);
         LocalDateTime end = null;
 
+        boolean valid = true;
+
         if(txtTitle.getText().toString().equals("")){
             Toast.makeText(this, Configuration.YOU_HAVE_TO_ENTER_A_TITLE, Toast.LENGTH_SHORT).show();
         }
@@ -218,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
             }
             catch(Exception e){
                 Toast.makeText(this, Configuration.THE_GIVEN_START_DATE_TIME_COULD_NOT_BE_PARSED, Toast.LENGTH_SHORT).show();
+                valid = false;
             }
 
             try{
@@ -225,17 +237,20 @@ public class MainActivity extends AppCompatActivity {
             }
             catch(Exception e){
                 Toast.makeText(this, Configuration.THE_GIVEN_END_DATE_TIME_COULD_NOT_BE_PARSED, Toast.LENGTH_SHORT).show();
+                valid = false;
             }
 
 
+            if(valid){
+                parcelManager.addTicket(new Parcel(txtTitle.getText().toString(),
+                        txtDesc.getText().toString(),
+                        start,
+                        end,
+                        parcelManager.getStandardCategory()));
 
-            parcelManager.addTicket(new Parcel(txtTitle.getText().toString(),
-                    txtDesc.getText().toString(),
-                    start,
-                    end,
-                    parcelManager.getStandardCategory()));
+                updateListView();
+            }
 
-            updateListView();
         }
 
     }
@@ -248,6 +263,8 @@ public class MainActivity extends AppCompatActivity {
 
         ParcelAdapter adapter = new ParcelAdapter(getApplicationContext(),R.layout.lvi_customlistviewitem,parcelManager.getTicketList());
         listView.setAdapter(adapter);
+
+        reloadCats();
     }
 
 
@@ -264,4 +281,18 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
+
+    private void reloadCats(){
+        Spinner spinner = findViewById(R.id.sp_categories);
+
+        Category cat = (Category) spinner.getSelectedItem();
+        Log.d(TAG, "spinnerItemSelected: " + cat.getName());
+        ParcelAdapter adapter = new ParcelAdapter(getApplicationContext(),
+                R.layout.lvi_customlistviewitem,
+                parcelManager.getParcelListForCategoryId(cat.getId()));
+
+        listView.setAdapter(adapter);
+    }
 }
+
+

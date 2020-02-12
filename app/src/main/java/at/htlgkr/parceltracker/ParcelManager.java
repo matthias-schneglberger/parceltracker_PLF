@@ -43,10 +43,16 @@ public class ParcelManager {
     }
 
     public Category getNextCategory(Category selectedCategory) {
-        try{
+//        try{
+//            return categories.get(selectedCategory.getId());
+//        }
+//        catch (Exception e){
+//            return selectedCategory;
+//        }
+        if(categories.size() > selectedCategory.getId()){
             return categories.get(selectedCategory.getId());
         }
-        catch (Exception e){
+        else{
             return selectedCategory;
         }
     }
